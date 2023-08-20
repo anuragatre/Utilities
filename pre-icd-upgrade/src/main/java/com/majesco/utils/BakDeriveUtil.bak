@@ -1,0 +1,107 @@
+package com.majesco.utils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class DeriveUtil {
+
+	private static String coverallHome;
+	private static int coverallHomeCount=0;
+	private static String majescoHome;
+	private static String javaPath;
+	
+	
+	private static void deviveHomes() throws Exception {
+		File[] rootDrive = File.listRoots();
+		   
+		//Get cover-all home
+		   for(File sysDrive : rootDrive){
+			   System.out.println("Drive : " + sysDrive.getAbsolutePath());
+			   System.out.println("Finding cover all home in -"+sysDrive);
+			   //Find cover-all folder in depth - 1
+			   Path path =Paths.get(sysDrive.getAbsolutePath());
+
+//------------
+			   
+			   String coverAllPath = sysDrive.toString()+"cover-all";
+			   String coverAllCheckPath = coverAllPath+File.separator+"config"+File.separator+"jdk.properties";
+			   System.out.println("Coverall Home for search "+coverAllPath);
+			   System.out.println("Coverall Home Check path "+coverAllCheckPath);
+			   File f1 = new File(coverAllCheckPath);
+			   if(f1.exists()) {
+				   coverallHome=coverAllPath.toString();
+				   coverallHomeCount++;
+				   System.out.println("Cover all home found-"+coverallHome);
+			   }
+
+//			   Path pathLic =Paths.get(f1.getAbsolutePath());
+//
+//
+//		        List<Path> paths = listDirectories(pathLic);			   			   
+//-----------------
+			   
+			   
+//		        List<Path> paths = listDirectories(path);
+ 
+//		        paths.forEach(x -> checkCoverAll(x));
+		        
+		        if(null !=coverallHome) {
+			        System.out.println("Cover all home - "+coverallHome);		        	
+			        System.out.println("Cover all home instances found - "+coverallHomeCount);		
+			        if(coverallHomeCount>1) {
+			        	throw new Exception("More than one cover-all instance found");
+			        }
+		        }
+
+		   } 
+	}
+	
+	private static void checkCoverAll(Path x) {
+		
+		System.out.println("Checking for cover-all-"+x.getFileName());
+//		if(x.getFileName()!=null && x.getFileName().startsWith("cover")){
+		if(x.getFileName()!=null && x.getFileName().toString().equalsIgnoreCase("cover-all")){
+//			System.out.println("inside check method-"+x.getFileName());			
+//			System.out.println("inside check method-absolute path -"+x.toAbsolutePath().toString());			
+			coverallHome = x.toAbsolutePath().toString();
+			coverallHomeCount++;
+			
+		}
+	}
+	
+	 // list all directories from this path
+    public static List<Path> listDirectories(Path path) throws IOException {
+
+        List<Path> result=null;
+        try {
+        	Stream<Path> walk = Files.walk(path, 1);
+        	result = walk.filter(Files::isDirectory).collect(Collectors.toList());
+//        	result = walk.filter(Files::isDirectory).filter(Files -> Files.exists("C:\\cover-all")).collect(Collectors.toList());
+//        	result = walk.filter(file -> file.getFileName().equals("cover-all")).collect(Collectors.toList());
+        }catch (Exception e) {
+			// TODO: handle exception
+		}
+
+        return result;
+
+    }	
+	
+	public static void main(String[] args) {
+		try {
+			deviveHomes();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+}
